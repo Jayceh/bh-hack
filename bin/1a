@@ -26,11 +26,11 @@ for my $pattern (@pats) {
     for my $word (@words) {
         if ($word =~ qr/$pattern/) {
             $matches++;
-            #print "- $word\n";
+#            print "- $word\n";
         }
     }
     $out .= "Case #$i: $matches\n";
 }
-chomp $out;
+#chomp $out;
 
 write_file($ARGV[1],$out) || die 'cannot write file';
