@@ -17,7 +17,7 @@ use v5.20.0;
 
 my $data = "$FindBin::Bin/../data";
 
-#memoize('factor');
+memoize('solver_pred');
 
 my $size = "small";
 GetOptions ("size=s" => \$size);
@@ -30,7 +30,6 @@ open (my $out, ">", "$data/out/round-2-problem-A-$size.jayce.out");
 
 my @solvers = map { Math::NumSeq::HappyNumbers->new(radix => $_) } (0..10);
 
-my %memoizer;
 my $row = 0;
 foreach my $line (@lines) {
   my @bases = split(/\s/, $line);
@@ -41,7 +40,8 @@ foreach my $line (@lines) {
     while( $solved != 1 ){
       $i++;
 
-    if (all { $solvers[ $_ ]->pred( $i ) } @bases) {
+    if (all { solver_pred(\@solvers,$_,$i) } @bases) {
+#    if (all { $solvers[ $_ ]->pred( $i ) } @bases) {
         say "Case #$row: $i";
         say $out "Case #$row: $i";
         $solved = 1;
@@ -55,11 +55,3 @@ sub solver_pred {
     return $s->[$du]->pred($i);
 }
 
-sub factor {
-  my $digit = shift;
-  my $ret = sum map { $_ * $_ } map{ split('') } ($digit);
-  if($ret > 4){
-    $ret = factor($ret);
-  }
-  return $ret;
-}
