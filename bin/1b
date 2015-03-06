@@ -1,0 +1,50 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use Data::Dumper;
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+
+
+# Set up a default file and path.
+our $FILE = 'round-1-problem-B-small.in';
+my $PATH  = @ARGV ? shift : "$FindBin::Bin/../data/$FILE";
+
+
+open my $infh, '<', $PATH || die $!;
+
+
+chomp( my $num_maps = <$infh> ); # Number of maps, eg 100.
+
+
+# Parse input into a structure as:
+# [
+#   {
+#     height   => h,
+#     width    => w,
+#     map      => [
+#                   [ a, b, c ],
+#                   [ d, e, f ],
+#                   [ g, h, i ],
+#                 ]
+#   },
+    { ... },
+# ]
+
+my @map;
+for my $map_num ( 1 .. $num_maps ) {
+    chomp( my $hw = <$infh> );
+    my( $height, $width ) = split /\s+/, $hw;
+
+    push @map, {
+        height  => $height,
+        width   => $width,
+        map     => [ map { my $line = <$infh>; chomp $line; [ split /\s+/, $line ] } 1 .. $height ]
+    };
+
+}
+
+print Dumper \@map;
+
