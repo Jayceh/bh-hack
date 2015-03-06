@@ -1,0 +1,141 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use Data::Dumper;
+use FindBin;
+use List::Util qw( min max );
+use lib "$FindBin::Bin/../lib";
+
+
+# Set up a default file and path.
+our $FILE = 'round-1-problem-B-small.in';
+#my $PATH  = @ARGV ? shift : "$FindBin::Bin/../data/$FILE";
+
+
+open my $infh, '<', $ARGV[0] || die $!;
+
+
+chomp( my $num_maps = <$infh> ); # Number of maps, eg 100.
+
+
+# Parse input into a structure as:
+# [
+#   {
+#     height   => h,
+#     width    => w,
+#     map      => [
+#                   [ a, b, c ],
+#                   [ d, e, f ],
+#                   [ g, h, i ],
+#                 ]
+#   },
+#   { ... },
+# ]
+
+my @map;
+for my $map_num ( 1 .. $num_maps ) {
+    chomp( my $hw = <$infh> );
+    my( $height, $width ) = split /\s+/, $hw;
+
+    push @map, {
+        height  => $height,
+        width   => $width,
+        map     => [ map { my $line = <$infh>; chomp $line; [ map {{elevation => $_ }} split /\s+/, $line ] } 1 .. $height ]
+    };
+}
+
+my $it = 0;
+my $output = '';
+for my $tmap (@map) {
+    $it++;
+    $tmap->{'current'} = 'a';
+#print "Starting $it\n";
+#print Dumper $tmap->{'map'};
+    for my $h (0 .. $tmap->{'height'}-1) {
+        for my $w (0 .. $tmap->{'width'}-1) {
+#warn "checking $h,$w";
+            my $v = get_basin($tmap, $h, $w, -1, -1);
+#warn "got $v as a result";
+        }
+    }
+    $output .= "Case #$it:\n";
+    for my $h (0 .. $tmap->{'height'}-1) {
+        for my $w (0 .. $tmap->{'width'}-1) {
+            $output .= $tmap->{'map'}->[$h][$w]->{'basin'};
+        }
+        $output .= "\n";
+    }
+}
+open my $filehandle, '>', $ARGV[1] || die 'cannot write out';
+print $filehandle $output;
+close $filehandle;
+#print Dumper @map;
+
+sub get_basin {
+    my ($tmap,$h,$w,$fh,$fw) = @_;
+#warn "$h,$w\n";
+    my $map = $tmap->{'map'};
+    return $map->[$h][$w]->{'basin'} if $map->[$h][$w]->{'basin'};
+    if ($tmap->{'height'} == 1 && $tmap->{'width'} == 1) {
+        return $map->[$h][$w]->{'basin'} = $tmap->{'current'};
+    }
+    my $elevation = $map->[$h][$w]->{'elevation'};
+    my $pneighbors = [];
+    if ($h > 0) {
+        push @$pneighbors, [$h-1, $w];
+    }
+    if ($w < $tmap->{'width'} - 1) {
+        push @$pneighbors, [$h,$w+1];
+    }
+    if ($h < $tmap->{'height'} - 1) {
+        push @$pneighbors, [$h+1,$w];
+    }
+    if ($w > 0) {
+        push @$pneighbors, [$h,$w-1];
+    }
+    my @neigh;
+    for my $n (@$pneighbors) {
+        my ($nh,$nw) = @$n;
+        push @neigh, $map->[$nh][$nw]->{'elevation'};
+    }
+    my $lowest  = min(@neigh);
+    my $highest = max(@neigh);
+    if ($lowest == $highest && $lowest == $map->[$h][$w]->{'elevation'}) {
+        $map->[$h][$w]->{'basin'} = $tmap->{'current'};
+        $tmap->{'current'}++;
+        return $map->[$h][$w]->{'basin'};
+    }
+#if (!defined $lowest) {
+#print Dumper $tmap->{'map'};
+#print "$h,$w\n";
+#print Dumper $pneighbors;
+#print Dumper @neigh;
+#die;
+#}
+    if ($lowest < $map->[$h][$w]->{'elevation'}) {
+        for my $n (@$pneighbors) {
+            my ($nh,$nw) = @$n;
+            next if !defined $map->[$nh][$nw]->{'elevation'} || $map->[$nh][$nw]->{'elevation'} != $lowest;
+            return $map->[$h][$w]->{'basin'} = get_basin($tmap,$nh,$nw,$h,$w);
+        }
+    }
+    elsif ($lowest > $map->[$h][$w]->{'elevation'}) {
+        $map->[$h][$w]->{'basin'} = $tmap->{'current'};
+#warn "$h, $w is the lowest";
+        $tmap->{'current'}++;
+        return $map->[$h][$w]->{'basin'};
+    }
+    else { #this is the same == lowest
+        for my $n (@$pneighbors) {
+            my ($nh,$nw) = @$n;
+            next if $map->[$nh][$nw]->{'elevation'} != $map->[$h][$w]->{'elevation'} || !$map->[$nh][$nw]->{'basin'};
+            return $map->[$h][$w]->{'basin'} = $map->[$nh][$nw]->{'basin'};
+        }
+#warn "$h, $w is the first lowest";
+        $map->[$h][$w]->{'basin'} = $tmap->{'current'};
+        $tmap->{'current'}++;
+        return $map->[$h][$w]->{'basin'};
+    }
+}
