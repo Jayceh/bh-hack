@@ -35,11 +35,11 @@ while (my ($first, $second) = $it->()) {
         my $seen_groups = 0;
 
         #Load as many groups on to the coaster as possible
+        #Don't let a group on the coaster more than once,
         while ($filled <= $seats && $seen_groups <= $groups - 1) {
             $seen_groups++;
 
-            #Don't let a group on the coaster more than once,
-            #or put more people on the coaster than can physically fit
+            #Fill up the coaster, but not with more people than it can handle
             if ($filled + $groups[0] <= $seats) {
                 #Treat groups as a circular array by shifting and pushing
                 my $g = shift @groups;
