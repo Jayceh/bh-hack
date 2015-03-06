@@ -5,16 +5,43 @@ use warnings;
 use Data::Dumper;
 use File::Slurp qw(read_file write_file);
 use List::MoreUtils qw(natatime);
+use List::Util qw(sum0);
+
 use v5.20;
 
 my $file = $ARGV[0] || die 'Missing input file';
 
+open (my $out, ">", "data/out/round-1-problem-C-small.jayce.out");
 my $contents = read_file($file);
 
 my @lines = split /\n/, $contents;
 my $tests = shift @lines;
 
 my $it = natatime 2, @lines;
+my $a = 0;
+
 while (my @vals = $it->()) {
-  say join( '<->', @vals);
+  my ($run_times, $capacity, $count) = split(/\s/,$vals[0]);  ## R,k,N
+  my @groups = split(/\s/, $vals[1]);                         ## g0, g1...
+  $a++;
+  my $fare = 0;
+  my $runs = 0; 
+  foreach ( 1..$run_times ) {
+    $runs++;
+    my @loading = ();
+    ## if current queue + next group < $capacity, then shift them into the current queue
+    while( sum0(@loading) < $capacity && scalar(@groups)) {
+      if( sum0(@loading) + $groups[0] > $capacity ){
+        last;
+      }
+        push( @loading, shift(@groups));
+    }
+
+    ## else run the coaster
+    ## which means just calculate the fare earned this iteration
+    $fare += sum0(@loading);
+    ## and requeue
+    push @groups, @loading;
+  }
+  say $out "Case #$a: $fare";
 }
