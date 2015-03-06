@@ -40,13 +40,19 @@ foreach my $line (@lines) {
     my $i = 1;
     while( $solved != 1 ){
       $i++;
-      if (all { $solvers[ $_ ]->pred( $i ) } @bases) {
+
+    if (all { $solvers[ $_ ]->pred( $i ) } @bases) {
         say "Case #$row: $i";
         say $out "Case #$row: $i";
         $solved = 1;
       }
     }
 
+}
+
+sub solver_pred {
+    my( $s, $du, $i ) = @_;
+    return $s->[$du]->pred($i);
 }
 
 sub factor {
