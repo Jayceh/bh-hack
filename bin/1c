@@ -1,0 +1,20 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use Data::Dumper;
+use File::Slurp qw(read_file write_file);
+use List::MoreUtils qw(natatime);
+use v5.20;
+
+my $file = $ARGV[0] || die 'Missing input file';
+
+my $contents = read_file($file);
+
+my @lines = split /\n/, $contents;
+my $tests = shift @lines;
+
+my $it = natatime 2, @lines;
+while (my @vals = $it->()) {
+  say join( '<->', @vals);
+}
