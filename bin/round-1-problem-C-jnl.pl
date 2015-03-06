@@ -53,7 +53,7 @@ while (my ($first, $second) = $it->()) {
         $total += $filled;
     }
 
-    say "Case $case: $total";
-    say $out "Case $case: $total";
+    say "Case #$case: $total";
+    say $out "Case #$case: $total";
 }
 
