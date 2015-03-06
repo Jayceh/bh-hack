@@ -14,7 +14,7 @@ ok 1;
 # Set up a default file and path.
 our $FILE = 'round-1-problem-B-small.in';
 my $PATH  = @ARGV ? shift : "$FindBin::Bin/../data/$FILE";
-
+our $NEXT_SINK = 'a';
 
 open my $infh, '<', $PATH || die $!;
 
@@ -28,9 +28,9 @@ chomp( my $num_maps = <$infh> ); # Number of maps, eg 100.
 #     height   => h,
 #     width    => w,
 #     map      => [
-#                   [ a, b, c ],
-#                   [ d, e, f ],
-#                   [ g, h, i ],
+#                   [ { elevation => a, basin => b }, { elevation => a, basin => b }, { elevation => a, basin => b } ],
+#                   [ ... ],
+#                   [ ... ],
 #                 ]
 #   },
 #   { ... },
@@ -44,10 +44,22 @@ for my $map_num ( 1 .. $num_maps ) {
     push @map, {
         height  => $height,
         width   => $width,
-        map     => [ map { my $line = <$infh>; chomp $line; [ split /\s+/, $line ] } 1 .. $height ]
+        map     => [ map { my $line = <$infh>; chomp $line; [ map {{elevation => $_ }} split /\s+/, $line ] } 1 .. $height ]                                                         
     };
-
+    last;
 }
+
+sub find_sink {
+  my( $y, $x ) = 
+
+
+
+
+
+
+
+
+
 
 is( scalar(@map), $num_maps, "Correct number of maps: $num_maps." );
 
