@@ -49,17 +49,11 @@ for my $map_num ( 1 .. $num_maps ) {
     last;
 }
 
-sub find_sink {
-  my( $y, $x ) = 
 
 
 
 
-
-
-
-
-
+# Tests
 
 is( scalar(@map), $num_maps, "Correct number of maps: $num_maps." );
 
