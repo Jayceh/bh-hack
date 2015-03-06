@@ -6,12 +6,13 @@ use Data::Dumper;
 use File::Slurp qw(read_file write_file);
 use List::MoreUtils qw(natatime);
 use List::Util qw(sum0);
+use Memoize;
 
 use v5.20;
 
 my $file = $ARGV[0] || die 'Missing input file';
-
-open (my $out, ">", "data/out/round-1-problem-C-small.jayce.out");
+memoize('load_coaster');
+open (my $out, ">", "data/out/round-1-problem-C-large.jayce.out");
 my $contents = read_file($file);
 
 my @lines = split /\n/, $contents;
@@ -28,20 +29,27 @@ while (my @vals = $it->()) {
   my $runs = 0; 
   foreach ( 1..$run_times ) {
     $runs++;
-    my @loading = ();
-    ## if current queue + next group < $capacity, then shift them into the current queue
-    while( sum0(@loading) < $capacity && scalar(@groups)) {
-      if( sum0(@loading) + $groups[0] > $capacity ){
-        last;
-      }
-        push( @loading, shift(@groups));
-    }
-
+    my @loading = load_coaster($capacity, \@groups);
     ## else run the coaster
     ## which means just calculate the fare earned this iteration
     $fare += sum0(@loading);
     ## and requeue
     push @groups, @loading;
   }
+  say "Case #$a: $fare";
   say $out "Case #$a: $fare";
+}
+
+sub load_coaster {
+    my ($capacity, $groups) = @_;
+    my @loading = ();
+    my $sum = sum0(@loading);
+    ## if current queue + next group < $capacity, then shift them into the current queue
+    while( $sum < $capacity && scalar(@{$groups})) {
+      if( $sum + $groups->[0] > $capacity ){
+        last;
+      }
+        push( @loading, shift(@{$groups}));
+    }
+    return @loading;
 }
