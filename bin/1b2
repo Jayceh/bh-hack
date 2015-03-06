@@ -63,10 +63,12 @@ for my $tmap (@map) {
     $output .= "Case #$it:\n";
     for my $h (0 .. $tmap->{'height'}-1) {
         for my $w (0 .. $tmap->{'width'}-1) {
-            $output .= $tmap->{'map'}->[$h][$w]->{'basin'};
+            $output .= "$tmap->{'map'}->[$h][$w]->{'basin'} ";
         }
+        chop $output;
         $output .= "\n";
     }
+    $output =~ s/\n+/\n/g;
 }
 open my $filehandle, '>', $ARGV[1] || die 'cannot write out';
 print $filehandle $output;
@@ -83,17 +85,21 @@ sub get_basin {
     }
     my $elevation = $map->[$h][$w]->{'elevation'};
     my $pneighbors = [];
+    #north
     if ($h > 0) {
         push @$pneighbors, [$h-1, $w];
     }
+    #west
+    if ($w > 0) {
+        push @$pneighbors, [$h,$w-1];
+    }
+    #east
     if ($w < $tmap->{'width'} - 1) {
         push @$pneighbors, [$h,$w+1];
     }
+    #south
     if ($h < $tmap->{'height'} - 1) {
         push @$pneighbors, [$h+1,$w];
-    }
-    if ($w > 0) {
-        push @$pneighbors, [$h,$w-1];
     }
     my @neigh;
     for my $n (@$pneighbors) {
@@ -102,7 +108,7 @@ sub get_basin {
     }
     my $lowest  = min(@neigh);
     my $highest = max(@neigh);
-    if ($lowest == $highest && $lowest == $map->[$h][$w]->{'elevation'}) {
+    if ($lowest == $map->[$h][$w]->{'elevation'}) {
         $map->[$h][$w]->{'basin'} = $tmap->{'current'};
         $tmap->{'current'}++;
         return $map->[$h][$w]->{'basin'};
@@ -139,3 +145,4 @@ sub get_basin {
         return $map->[$h][$w]->{'basin'};
     }
 }
+
