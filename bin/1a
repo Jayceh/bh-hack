@@ -1,0 +1,36 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use Data::Dumper;
+use File::Slurp qw(read_file write_file);
+
+my $file = $ARGV[0] || die 'Missing input file';
+
+my $contents = read_file($file);
+$contents =~ s/\(/[/g;
+$contents =~ s/\)/]/g;
+
+my @lines = split /\n/, $contents;
+
+my $numbers = shift @lines;
+my ($l, $d, $n) = split /\s+/, $numbers;
+
+my @words = @lines[0..$d-1];
+my @pats  = @lines[$d .. scalar(@lines)-1];
+
+my $i = 0;
+my $out = '';
+for my $pattern (@pats) {
+    $i++;
+    my $matches = 0;
+    for my $word (@words) {
+        if ($word =~ qr/$pattern/) {
+            $matches++;
+            #print "- $word\n";
+        }
+    }
+    $out .= "Case #$i: $matches\n";
+}
+chomp $out;
+
+write_file($ARGV[1],$out) || die 'cannot write file';
