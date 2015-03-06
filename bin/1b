@@ -5,8 +5,11 @@ use warnings;
 
 use Data::Dumper;
 use FindBin;
+use Test::More;
+
 use lib "$FindBin::Bin/../lib";
 
+ok 1;
 
 # Set up a default file and path.
 our $FILE = 'round-1-problem-B-small.in';
@@ -30,7 +33,7 @@ chomp( my $num_maps = <$infh> ); # Number of maps, eg 100.
 #                   [ g, h, i ],
 #                 ]
 #   },
-    { ... },
+#   { ... },
 # ]
 
 my @map;
@@ -46,5 +49,6 @@ for my $map_num ( 1 .. $num_maps ) {
 
 }
 
-print Dumper \@map;
+is( scalar(@map), $num_maps, "Correct number of maps: $num_maps." );
 
+done_testing();
